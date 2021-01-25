@@ -8,8 +8,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Optional;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
  * @author mb
@@ -32,6 +38,7 @@ import java.util.Optional;
 public class FileResource {
 
   private final FileService fileService;
+  private final RequestMappingHandlerMapping handlerMapping;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ApiOperation(value = "Saves File instance.", tags = {"File"})
@@ -90,6 +97,18 @@ public class FileResource {
   public ResponseEntity delete(@PathVariable("id") final String id) {
     fileService.delete(id);
     return new ResponseEntity(HttpStatus.NO_CONTENT);
+  }
+
+  @GetMapping("/endpoints")
+  public ResponseEntity<List<String>> getAllEndPoints(){
+    return ResponseEntity.ok(handlerMapping.getHandlerMethods()
+        //.entrySet()
+        .keySet()
+        .stream()
+        /*.collect(Collectors.toMap(entry -> entry.getKey().toString(),
+            entry -> entry.getValue().getReturnType().())));*/
+        .map(RequestMappingInfo::toString)
+        .collect(Collectors.toList()));
   }
 }
 
